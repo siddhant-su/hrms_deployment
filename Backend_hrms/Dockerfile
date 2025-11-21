@@ -1,16 +1,5 @@
-FROM node:20-alpine AS build
+FROM eclipse-temurin:17-jdk
 WORKDIR /app
- 
-COPY package*.json ./
-RUN npm install
- 
-COPY . .
-RUN npm run build --prod
- 
-FROM nginx:stable-alpine
-WORKDIR /usr/share/nginx/html
- 
-COPY --from=build /app/dist/hrms/browser ./
- 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+COPY target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
