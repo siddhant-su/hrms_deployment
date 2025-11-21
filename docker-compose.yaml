@@ -1,0 +1,58 @@
+version: "3.9"
+ 
+services:
+  mysql:
+    image: mysql:8
+    container_name: hrms-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: hrmsdb
+      MYSQL_USER: hrmsuser
+      MYSQL_PASSWORD: hmrspass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - hrms_network
+ 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hrms-backend
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: hrmsdb
+      DB_USER: hrmsuser
+      DB_PASSWORD: hmrspass
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    networks:
+      - hrms_network
+ 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hrms-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - hrms_network
+ 
+volumes:
+  mysql_data:
+ 
+networks:
+  hrms_network:
+    driver: bridge
